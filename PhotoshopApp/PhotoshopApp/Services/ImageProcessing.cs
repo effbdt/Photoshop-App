@@ -54,7 +54,7 @@ namespace PhotoshopApp.Services
 
 				byte red, green, blue;
 
-				for (int y = 0; y < b.Height; y++)
+				for (int y = 0; y < b.Height; ++y)
 				{
 					for (int x = 0; x < b.Width; ++x)
 					{
@@ -66,6 +66,40 @@ namespace PhotoshopApp.Services
 							(.299 * red + .587 * green + .114 * blue);
 
 						p += 3;
+					}
+					p += nOffset;
+				}
+			}
+
+			b.UnlockBits(bmData);
+		}
+
+		public static void Brightness(Bitmap b, int value)
+		{
+			BitmapData bmData = b.LockBits(new Rectangle(0, 0, b.Width, b.Height),
+				ImageLockMode.ReadWrite, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
+
+			int stride = bmData.Stride;
+			System.IntPtr Scan0 = bmData.Scan0;
+
+			unsafe
+			{
+				byte* p = (byte*)(void*)Scan0;
+
+				int nOffset = stride - b.Width * 3;
+				int nWidth = b.Width * 3;
+				int nHeight = b.Height;
+
+				for (int y = 0; y < b.Height; ++y)
+				{
+					for (int x = 0; x < nWidth; ++x)
+					{
+						int temp = (int)(p[0] + value);
+						if (temp < 0) temp = 0;
+						if (temp > 255) temp = 255;
+
+						p[0] = (byte)temp;
+						++p;
 					}
 					p += nOffset;
 				}

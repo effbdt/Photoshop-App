@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("PhotoshopApp")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+83e0575b7aef7f24e12f2d1ef2ef25915cbd2154")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+f51b69873747f4f6dac9fa1ec142977c9ec887ff")]
 [assembly: System.Reflection.AssemblyProductAttribute("PhotoshopApp")]
 [assembly: System.Reflection.AssemblyTitleAttribute("PhotoshopApp")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

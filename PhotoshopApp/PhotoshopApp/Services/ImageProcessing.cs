@@ -160,17 +160,6 @@ namespace PhotoshopApp.Services
 			b.UnlockBits(bmData);
 		}
 
-		public byte[] GammaLookUpTable(double color)
-		{
-			byte[] lut = new byte[256];
-			for (int i = 0; i < 256; i++)
-			{
-				lut[i] = (byte)Math.Min(255, (int)(
-					(255.0 * Math.Pow(i / 255.0, 1.0 / color)) + 0.5));
-			}
-			return lut;
-		}
-
 		public static void Gamma(Bitmap b, double red, double blue, double green)
 		{
 			BitmapData bmData = b.LockBits(new Rectangle(0, 0, b.Width, b.Height),

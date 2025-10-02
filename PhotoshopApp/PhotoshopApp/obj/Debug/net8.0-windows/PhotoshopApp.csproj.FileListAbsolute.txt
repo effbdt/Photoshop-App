@@ -18,3 +18,10 @@ C:\Users\DAVIDOF\Desktop\Egyetem XD\kepfeldolgozas\PhotosopAppFolder\PhotoshopAp
 C:\Users\DAVIDOF\Desktop\Egyetem XD\kepfeldolgozas\PhotosopAppFolder\PhotoshopApp\PhotoshopApp\obj\Debug\net8.0-windows\PhotoshopApp.pdb
 C:\Users\DAVIDOF\Desktop\Egyetem XD\kepfeldolgozas\PhotosopAppFolder\PhotoshopApp\PhotoshopApp\obj\Debug\net8.0-windows\PhotoshopApp.genruntimeconfig.cache
 C:\Users\DAVIDOF\Desktop\Egyetem XD\kepfeldolgozas\PhotosopAppFolder\PhotoshopApp\PhotoshopApp\obj\Debug\net8.0-windows\ref\PhotoshopApp.dll
+C:\Users\DAVIDOF\Desktop\Egyetem XD\kepfeldolgozas\PhotosopAppFolder\PhotoshopApp\PhotoshopApp\bin\Debug\net8.0-windows\Microsoft.Win32.SystemEvents.dll
+C:\Users\DAVIDOF\Desktop\Egyetem XD\kepfeldolgozas\PhotosopAppFolder\PhotoshopApp\PhotoshopApp\bin\Debug\net8.0-windows\System.Drawing.Common.dll
+C:\Users\DAVIDOF\Desktop\Egyetem XD\kepfeldolgozas\PhotosopAppFolder\PhotoshopApp\PhotoshopApp\bin\Debug\net8.0-windows\System.Private.Windows.Core.dll
+C:\Users\DAVIDOF\Desktop\Egyetem XD\kepfeldolgozas\PhotosopAppFolder\PhotoshopApp\PhotoshopApp\bin\Debug\net8.0-windows\runtimes\win\lib\net8.0\Microsoft.Win32.SystemEvents.dll
+C:\Users\DAVIDOF\Desktop\Egyetem XD\kepfeldolgozas\PhotosopAppFolder\PhotoshopApp\PhotoshopApp\obj\Debug\net8.0-windows\PhotoshopApp.csproj.AssemblyReference.cache
+C:\Users\DAVIDOF\Desktop\Egyetem XD\kepfeldolgozas\PhotosopAppFolder\PhotoshopApp\PhotoshopApp\obj\Debug\net8.0-windows\PhotoshopApp.sourcelink.json
+C:\Users\DAVIDOF\Desktop\Egyetem XD\kepfeldolgozas\PhotosopAppFolder\PhotoshopApp\PhotoshopApp\obj\Debug\net8.0-windows\Photosho.39FCF9F0.Up2Date

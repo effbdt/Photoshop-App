@@ -3,12 +3,12 @@
   "WorkspaceRootPath": "C:\\Users\\DAVIDOF\\Desktop\\Egyetem XD\\kepfeldolgozas\\PhotosopAppFolder\\PhotoshopApp\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{136C8718-BC8A-4EF7-A29F-556F62E782BA}|PhotoshopApp\\PhotoshopApp.csproj|c:\\users\\davidof\\desktop\\egyetem xd\\kepfeldolgozas\\photosopappfolder\\photoshopapp\\photoshopapp\\services\\convmatrix.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{136C8718-BC8A-4EF7-A29F-556F62E782BA}|PhotoshopApp\\PhotoshopApp.csproj|solutionrelative:photoshopapp\\services\\convmatrix.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{136C8718-BC8A-4EF7-A29F-556F62E782BA}|PhotoshopApp\\PhotoshopApp.csproj|c:\\users\\davidof\\desktop\\egyetem xd\\kepfeldolgozas\\photosopappfolder\\photoshopapp\\photoshopapp\\services\\imageprocessing.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{136C8718-BC8A-4EF7-A29F-556F62E782BA}|PhotoshopApp\\PhotoshopApp.csproj|solutionrelative:photoshopapp\\services\\imageprocessing.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{136C8718-BC8A-4EF7-A29F-556F62E782BA}|PhotoshopApp\\PhotoshopApp.csproj|c:\\users\\davidof\\desktop\\egyetem xd\\kepfeldolgozas\\photosopappfolder\\photoshopapp\\photoshopapp\\services\\convmatrix.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{136C8718-BC8A-4EF7-A29F-556F62E782BA}|PhotoshopApp\\PhotoshopApp.csproj|solutionrelative:photoshopapp\\services\\convmatrix.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{136C8718-BC8A-4EF7-A29F-556F62E782BA}|PhotoshopApp\\PhotoshopApp.csproj|c:\\users\\davidof\\desktop\\egyetem xd\\kepfeldolgozas\\photosopappfolder\\photoshopapp\\photoshopapp\\mainwindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
@@ -26,30 +26,30 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 0,
+          "SelectedChildIndex": 1,
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 0,
+              "DocumentIndex": 1,
               "Title": "ConvMatrix.cs",
               "DocumentMoniker": "C:\\Users\\DAVIDOF\\Desktop\\Egyetem XD\\kepfeldolgozas\\PhotosopAppFolder\\PhotoshopApp\\PhotoshopApp\\Services\\ConvMatrix.cs",
               "RelativeDocumentMoniker": "PhotoshopApp\\Services\\ConvMatrix.cs",
               "ToolTip": "C:\\Users\\DAVIDOF\\Desktop\\Egyetem XD\\kepfeldolgozas\\PhotosopAppFolder\\PhotoshopApp\\PhotoshopApp\\Services\\ConvMatrix.cs",
               "RelativeToolTip": "PhotoshopApp\\Services\\ConvMatrix.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAgAAAAHAAAAAAAAAA==",
+              "ViewState": "AgIAAAYAAAAAAAAAAAAAAAgAAAAHAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-10-02T16:10:43.357Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 0,
               "Title": "ImageProcessing.cs",
               "DocumentMoniker": "C:\\Users\\DAVIDOF\\Desktop\\Egyetem XD\\kepfeldolgozas\\PhotosopAppFolder\\PhotoshopApp\\PhotoshopApp\\Services\\ImageProcessing.cs",
               "RelativeDocumentMoniker": "PhotoshopApp\\Services\\ImageProcessing.cs",
               "ToolTip": "C:\\Users\\DAVIDOF\\Desktop\\Egyetem XD\\kepfeldolgozas\\PhotosopAppFolder\\PhotoshopApp\\PhotoshopApp\\Services\\ImageProcessing.cs",
               "RelativeToolTip": "PhotoshopApp\\Services\\ImageProcessing.cs",
-              "ViewState": "AgIAAAMAAAAAAAAAAAAAAGgAAAASAAAAAAAAAA==",
+              "ViewState": "AgIAANAAAAAAAAAAAAAywDoBAAAPAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-10-01T15:24:09.454Z",
               "EditorCaption": ""

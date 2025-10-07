@@ -75,90 +75,90 @@ namespace PhotoshopApp.Services
 			b.UnlockBits(bmData);
 		}
 
-		public static void Brightness(Bitmap b, int value)
-		{
-			BitmapData bmData = b.LockBits(new Rectangle(0, 0, b.Width, b.Height),
-				ImageLockMode.ReadWrite, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
+		//public static void Brightness(Bitmap b, int value)
+		//{
+		//	BitmapData bmData = b.LockBits(new Rectangle(0, 0, b.Width, b.Height),
+		//		ImageLockMode.ReadWrite, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
 
-			int stride = bmData.Stride;
-			System.IntPtr Scan0 = bmData.Scan0;
+		//	int stride = bmData.Stride;
+		//	System.IntPtr Scan0 = bmData.Scan0;
 
-			unsafe
-			{
-				byte* p = (byte*)(void*)Scan0;
+		//	unsafe
+		//	{
+		//		byte* p = (byte*)(void*)Scan0;
 
-				int nOffset = stride - b.Width * 3;
-				int nWidth = b.Width * 3;
-				int nHeight = b.Height;
+		//		int nOffset = stride - b.Width * 3;
+		//		int nWidth = b.Width * 3;
+		//		int nHeight = b.Height;
 
-				for (int y = 0; y < b.Height; ++y)
-				{
-					for (int x = 0; x < nWidth; ++x)
-					{
-						int temp = (int)(p[0] + value);
-						if (temp < 0) temp = 0;
-						if (temp > 255) temp = 255;
+		//		for (int y = 0; y < b.Height; ++y)
+		//		{
+		//			for (int x = 0; x < nWidth; ++x)
+		//			{
+		//				int temp = (int)(p[0] + value);
+		//				if (temp < 0) temp = 0;
+		//				if (temp > 255) temp = 255;
 
-						p[0] = (byte)temp;
-						++p;
-					}
-					p += nOffset;
-				}
-			}
+		//				p[0] = (byte)temp;
+		//				++p;
+		//			}
+		//			p += nOffset;
+		//		}
+		//	}
 
-			b.UnlockBits(bmData);
-		}
+		//	b.UnlockBits(bmData);
+		//}
 
-		public static void Contrast(Bitmap b, int nContrast)
-		{
-			if (nContrast < -100) nContrast = -100;
-			if (nContrast > 100) nContrast = 100;
+		//public static void Contrast(Bitmap b, int nContrast)
+		//{
+		//	if (nContrast < -100) nContrast = -100;
+		//	if (nContrast > 100) nContrast = 100;
 
-			BitmapData bmData = b.LockBits(new Rectangle(0, 0, b.Width, b.Height),
-				ImageLockMode.ReadWrite, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
+		//	BitmapData bmData = b.LockBits(new Rectangle(0, 0, b.Width, b.Height),
+		//		ImageLockMode.ReadWrite, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
 
-			int stride = bmData.Stride;
-			System.IntPtr Scan0 = bmData.Scan0;
+		//	int stride = bmData.Stride;
+		//	System.IntPtr Scan0 = bmData.Scan0;
 
-			double contrast = (100.0 + nContrast) / 100.0;
-			contrast *= contrast;
+		//	double contrast = (100.0 + nContrast) / 100.0;
+		//	contrast *= contrast;
 
-			byte[] contrastLut = new byte[256];
+		//	byte[] contrastLut = new byte[256];
 
-			for (int i = 0; i < 256; i++)
-			{
-				double pixel = i / 255.0;
-				pixel -= 0.5;
-				pixel *= contrast;
-				pixel += 0.5;
-				pixel *= 255;
+		//	for (int i = 0; i < 256; i++)
+		//	{
+		//		double pixel = i / 255.0;
+		//		pixel -= 0.5;
+		//		pixel *= contrast;
+		//		pixel += 0.5;
+		//		pixel *= 255;
 
-				if (pixel < 0) pixel = 0;
-				if (pixel > 255) pixel = 255;
+		//		if (pixel < 0) pixel = 0;
+		//		if (pixel > 255) pixel = 255;
 
-				contrastLut[i] = (byte)pixel;
-			}
+		//		contrastLut[i] = (byte)pixel;
+		//	}
 
-			unsafe
-			{
-				byte* p = (byte*)(void*)Scan0;
-				int nOffset = stride - b.Width * 3;
+		//	unsafe
+		//	{
+		//		byte* p = (byte*)(void*)Scan0;
+		//		int nOffset = stride - b.Width * 3;
 
-				for (int y = 0; y < b.Height; ++y)
-				{
-					for (int x = 0; x < b.Width; ++x)
-					{
-						p[0] = contrastLut[p[0]];
-						p[1] = contrastLut[p[1]];
-						p[2] = contrastLut[p[2]];
-						p += 3;
-					}
-					p += nOffset;
-				}
-			}
+		//		for (int y = 0; y < b.Height; ++y)
+		//		{
+		//			for (int x = 0; x < b.Width; ++x)
+		//			{
+		//				p[0] = contrastLut[p[0]];
+		//				p[1] = contrastLut[p[1]];
+		//				p[2] = contrastLut[p[2]];
+		//				p += 3;
+		//			}
+		//			p += nOffset;
+		//		}
+		//	}
 
-			b.UnlockBits(bmData);
-		}
+		//	b.UnlockBits(bmData);
+		//}
 
 		public static void Gamma(Bitmap b, double red, double blue, double green)
 		{
@@ -431,6 +431,89 @@ namespace PhotoshopApp.Services
 						p[1] = logLUT[p[1]];
 						p[2] = logLUT[p[2]];
 
+						p += 3;
+					}
+					p += nOffset;
+				}
+			}
+
+			b.UnlockBits(bmData);
+		}
+
+		public static int[] Histogram(Bitmap b)
+		{
+			int[] hist = new int[256];
+
+			BitmapData bmData = b.LockBits(new Rectangle(0, 0, b.Width, b.Height),
+	   ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
+
+			int stride = bmData.Stride;
+			IntPtr Scan0 = bmData.Scan0;
+
+			unsafe
+			{
+				byte* p = (byte*)(void*)Scan0;
+				int nOffset = stride - b.Width * 3;
+
+				for (int y = 0; y < b.Height; y++)
+				{
+					for (int x = 0; x < b.Width; x++)
+					{
+						byte blue = p[0];
+						byte green = p[1];
+						byte red = p[2];
+
+						int intensity = (int)(0.299 * red + 0.587 * green + 0.114 * blue);
+
+						hist[intensity]++;
+
+						p += 3;
+					}
+					p += nOffset;
+				}
+			}
+
+			b.UnlockBits(bmData);
+			return hist;
+		}
+
+		public static void HistogramEqualization(Bitmap b)
+		{
+			int[] hist = Histogram(b);
+			int totalPixels = b.Width * b.Height;
+
+			int[] cdf = new int[256];
+			cdf[0] = hist[0];
+			for (int i = 1; i < 256; i++)
+				cdf[i] = cdf[i - 1] + hist[i];
+
+			byte[] lut = new byte[256];
+			float scale = 255f / (totalPixels - cdf[0]);
+			for (int i = 0; i < 256; i++)
+			{
+				lut[i] = (byte)Math.Round((cdf[i] - cdf[0]) * scale);
+				if (lut[i] < 0) lut[i] = 0;
+				if (lut[i] > 255) lut[i] = 255;
+			}
+
+			BitmapData bmData = b.LockBits(new Rectangle(0, 0, b.Width, b.Height),
+				ImageLockMode.ReadWrite, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
+
+			int stride = bmData.Stride;
+			IntPtr Scan0 = bmData.Scan0;
+
+			unsafe
+			{
+				byte* p = (byte*)(void*)Scan0;
+				int nOffset = stride - b.Width * 3;
+
+				for (int y = 0; y < b.Height; y++)
+				{
+					for (int x = 0; x < b.Width; x++)
+					{
+						p[0] = lut[p[0]];
+						p[1] = lut[p[1]];
+						p[2] = lut[p[2]];
 						p += 3;
 					}
 					p += nOffset;

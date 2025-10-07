@@ -389,5 +389,17 @@ namespace PhotoshopApp.Services
 			bY.UnlockBits(bmY);
 		}
 
+		public static void LaplaceEdgeDetector(Bitmap b)
+		{
+			ConvMatrix m = new ConvMatrix();
+
+			m.TopLeft = 0; m.TopMid = -1; m.TopRight = 0;
+			m.MidLeft = -1; m.Pixel = 4; m.MidRight = -1;
+			m.BottomLeft = 0; m.BottomMid = -1; m.BottomRight = 0;
+
+			m.Factor = 1;
+			m.Offset = 128;
+			Conv3x3(b, m);
+		}
 	}
 }

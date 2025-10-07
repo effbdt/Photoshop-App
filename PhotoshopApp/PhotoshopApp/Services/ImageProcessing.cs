@@ -317,5 +317,77 @@ namespace PhotoshopApp.Services
 
 			Conv3x3(b, m);
 		}
+
+		public static void SobelEdgeDetector(Bitmap b)
+		{
+			Bitmap bX = (Bitmap)b.Clone();
+			Bitmap bY = (Bitmap)b.Clone();
+
+			// Sobel X
+			ConvMatrix mx = new ConvMatrix();
+			mx.TopLeft = -1; mx.TopMid = 0; mx.TopRight = 1;
+			mx.MidLeft = -2; mx.Pixel = 0; mx.MidRight = 2;
+			mx.BottomLeft = -1; mx.BottomMid = 0; mx.BottomRight = 1;
+			mx.Factor = 1;
+			mx.Offset = 0;
+
+			// Sobel Y
+			ConvMatrix my = new ConvMatrix();
+			my.TopLeft = -1; my.TopMid = -2; my.TopRight = -1;
+			my.MidLeft = 0; my.Pixel = 0; my.MidRight = 0;
+			my.BottomLeft = 1; my.BottomMid = 2; my.BottomRight = 1;
+			my.Factor = 1;
+			my.Offset = 0;
+
+			// Apply the convolutions
+			Conv3x3(bX, mx);
+			Conv3x3(bY, my);
+
+			// Combine results
+			BitmapData bmData = b.LockBits(new Rectangle(0, 0, b.Width, b.Height),
+				ImageLockMode.ReadWrite, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
+			BitmapData bmX = bX.LockBits(new Rectangle(0, 0, b.Width, b.Height),
+				ImageLockMode.ReadWrite, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
+			BitmapData bmY = bY.LockBits(new Rectangle(0, 0, b.Width, b.Height),
+				ImageLockMode.ReadWrite, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
+
+			int stride = bmData.Stride;
+			int offset = stride - b.Width * 3;
+
+			unsafe
+			{
+				byte* p = (byte*)bmData.Scan0;
+				byte* px = (byte*)bmX.Scan0;
+				byte* py = (byte*)bmY.Scan0;
+
+				for (int y = 0; y < b.Height; y++)
+				{
+					for (int x = 0; x < b.Width; x++)
+					{
+						for (int c = 0; c < 3; c++)
+						{
+							int gx = px[c];
+							int gy = py[c];
+							int g = (int)Math.Sqrt(gx * gx + gy * gy);
+							if (g > 255) g = 255;
+							p[c] = (byte)g;
+						}
+
+						p += 3;
+						px += 3;
+						py += 3;
+					}
+
+					p += offset;
+					px += offset;
+					py += offset;
+				}
+			}
+
+			b.UnlockBits(bmData);
+			bX.UnlockBits(bmX);
+			bY.UnlockBits(bmY);
+		}
+
 	}
 }

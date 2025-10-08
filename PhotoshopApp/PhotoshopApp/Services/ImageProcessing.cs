@@ -523,5 +523,100 @@ namespace PhotoshopApp.Services
 			b.UnlockBits(bmData);
 		}
 
+		public static void HarrisCornerDetector(Bitmap b, double k = 0.04, double threshold = 1000000)
+{
+    int width = b.Width;
+    int height = b.Height;
+
+    // Convert image to grayscale first
+    Grayscale(b);
+
+    // Step 1: Compute gradients using Sobel
+    double[,] Ix = new double[width, height];
+    double[,] Iy = new double[width, height];
+
+    BitmapData bmData = b.LockBits(new Rectangle(0, 0, width, height),
+        ImageLockMode.ReadOnly, PixelFormat.Format24bppRgb);
+
+    int stride = bmData.Stride;
+    int nOffset = stride - width * 3;
+    unsafe
+    {
+        byte* p = (byte*)bmData.Scan0;
+        for (int y = 1; y < height - 1; y++)
+        {
+            for (int x = 1; x < width - 1; x++)
+            {
+                // Sobel X
+                double gx =
+                    -p[-stride - 3] - 2 * p[-3] - p[stride - 3] +
+                    p[-stride + 3] + 2 * p[3] + p[stride + 3];
+
+                // Sobel Y
+                double gy =
+                    -p[-stride - 3] - 2 * p[-stride] - p[-stride + 3] +
+                    p[stride - 3] + 2 * p[stride] + p[stride + 3];
+
+                Ix[x, y] = gx;
+                Iy[x, y] = gy;
+
+                p += 3;
+            }
+            p += nOffset + 3; // skip last pixel
+        }
+    }
+    b.UnlockBits(bmData);
+
+    // Step 2: Compute Harris response
+    double[,] R = new double[width, height];
+    double maxR = 0;
+
+    for (int y = 1; y < height - 1; y++)
+    {
+        for (int x = 1; x < width - 1; x++)
+        {
+            double ix = Ix[x, y];
+            double iy = Iy[x, y];
+
+            double ix2 = ix * ix;
+            double iy2 = iy * iy;
+            double ixy = ix * iy;
+
+            double det = (ix2 * iy2) - (ixy * ixy);
+            double trace = ix2 + iy2;
+
+            double r = det - k * (trace * trace);
+            R[x, y] = r;
+
+            if (r > maxR) maxR = r;
+        }
+    }
+
+    // Step 3: Draw corners (threshold relative to maxR)
+    BitmapData bmDataOut = b.LockBits(new Rectangle(0, 0, width, height),
+        ImageLockMode.ReadWrite, PixelFormat.Format24bppRgb);
+
+    stride = bmDataOut.Stride;
+    nOffset = stride - width * 3;
+    unsafe
+    {
+        byte* p = (byte*)bmDataOut.Scan0;
+        for (int y = 1; y < height - 1; y++)
+        {
+            for (int x = 1; x < width - 1; x++)
+            {
+                if (R[x, y] > threshold)
+                {
+                    // Mark corner in red
+                    byte* pixel = p + y * stride + x * 3;
+                    pixel[0] = 0;    // B
+                    pixel[1] = 0;    // G
+                    pixel[2] = 255;  // R
+                }
+            }
+        }
+    }
+    b.UnlockBits(bmDataOut);
+}
 	}
 }

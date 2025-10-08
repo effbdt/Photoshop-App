@@ -37,6 +37,8 @@ namespace PhotoshopApp
 			FilterComboBox.Items.Add("LaplaceEdgeDetector");
 			FilterComboBox.Items.Add("LogTransform");
 			FilterComboBox.Items.Add("HistogramEqualization");
+			FilterComboBox.Items.Add("HarrisCornerDetector");
+
 
 			FilterComboBox.SelectedIndex = 0;
 		}
@@ -157,6 +159,10 @@ namespace PhotoshopApp
 				case "HistogramEqualization":
 					ImageProcessing.HistogramEqualization(loadedImage);
 					break;
+					case "HarrisCornerDetector":
+    ImageProcessing.HarrisCornerDetector(loadedImage, 0.04, 1000000);
+    break;
+
 			}
 
 			MyImageControl.Source = ConvertToBitmapImage(loadedImage);

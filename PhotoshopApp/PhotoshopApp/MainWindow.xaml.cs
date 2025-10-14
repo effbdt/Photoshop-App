@@ -159,9 +159,9 @@ namespace PhotoshopApp
 				case "HistogramEqualization":
 					ImageProcessing.HistogramEqualization(loadedImage);
 					break;
-					case "HarrisCornerDetector":
-    ImageProcessing.HarrisCornerDetector(loadedImage, 0.04, 1000000);
-    break;
+				case "HarrisCornerDetector":
+					ImageProcessing.HarrisCornerDetector(loadedImage);
+					break;
 
 			}
 

@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Media;
 using System.Windows.Media.Effects;
+using System.Windows.Media.Media3D;
 
 namespace PhotoshopApp.Services
 {
@@ -166,7 +167,7 @@ namespace PhotoshopApp.Services
 				ImageLockMode.ReadWrite, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
 
 			int stride = bmData.Stride;
-			System.IntPtr Scan0 = bmData.Scan0;
+			IntPtr Scan0 = bmData.Scan0;
 
 			byte[] redGamma = new byte[256];
 			byte[] greenGamma = new byte[256];
@@ -180,27 +181,25 @@ namespace PhotoshopApp.Services
 				blueGamma[i] = (byte)Math.Min(255, (int)(
 					(255.0 * Math.Pow(i / 255.0, 1.0 / blue)) + 0.5));
 			}
-
+			int width = b.Width;
+			int height = b.Height;
 			unsafe
 			{
-				byte* p = (byte*)(void*)Scan0;
 
-				int nOffset = stride - b.Width * 3;
-				int nWidth = b.Width * 3;
-				int nHeight = b.Height;
-
-				for (int y = 0; y < b.Height; ++y)
+				byte* p = (byte*)Scan0;
+				Parallel.For(0, height, y =>
 				{
-					for (int x = 0; x < nWidth; ++x)
-					{
-						p[0] = blueGamma[p[0]];
-						p[1] = greenGamma[p[1]];
-						p[2] = redGamma[p[2]];
+					byte* row = p + (y * stride);
 
-						p += 3;
+					for (int x = 0; x < width; x++)
+					{
+						row[0] = blueGamma[row[0]];
+						row[1] = greenGamma[row[1]];
+						row[2] = redGamma[row[2]];
+
+						row += 3;
 					}
-					p += nOffset;
-				}
+				});
 			}
 
 			b.UnlockBits(bmData);
@@ -323,7 +322,6 @@ namespace PhotoshopApp.Services
 			Bitmap bX = (Bitmap)b.Clone();
 			Bitmap bY = (Bitmap)b.Clone();
 
-			// Sobel X
 			ConvMatrix mx = new ConvMatrix();
 			mx.TopLeft = -1; mx.TopMid = 0; mx.TopRight = 1;
 			mx.MidLeft = -2; mx.Pixel = 0; mx.MidRight = 2;
@@ -331,7 +329,6 @@ namespace PhotoshopApp.Services
 			mx.Factor = 1;
 			mx.Offset = 0;
 
-			// Sobel Y
 			ConvMatrix my = new ConvMatrix();
 			my.TopLeft = -1; my.TopMid = -2; my.TopRight = -1;
 			my.MidLeft = 0; my.Pixel = 0; my.MidRight = 0;
@@ -339,11 +336,9 @@ namespace PhotoshopApp.Services
 			my.Factor = 1;
 			my.Offset = 0;
 
-			// Apply the convolutions
 			Conv3x3(bX, mx);
 			Conv3x3(bY, my);
 
-			// Combine results
 			BitmapData bmData = b.LockBits(new Rectangle(0, 0, b.Width, b.Height),
 				ImageLockMode.ReadWrite, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
 			BitmapData bmX = bX.LockBits(new Rectangle(0, 0, b.Width, b.Height),
@@ -523,100 +518,101 @@ namespace PhotoshopApp.Services
 			b.UnlockBits(bmData);
 		}
 
-		public static void HarrisCornerDetector(Bitmap b, double k = 0.04, double threshold = 1000000)
-{
-    int width = b.Width;
-    int height = b.Height;
+		public static void HarrisCornerDetector(Bitmap b)
+		{
+			const float k = 0.04f;
+			const float threshold = 1000000f;
+			const int windowRadius = 1;
 
-    // Convert image to grayscale first
-    Grayscale(b);
+			int width = b.Width;
+			int height = b.Height;
 
-    // Step 1: Compute gradients using Sobel
-    double[,] Ix = new double[width, height];
-    double[,] Iy = new double[width, height];
+			BitmapData bmData = b.LockBits(
+				new Rectangle(0, 0, width, height),
+				ImageLockMode.ReadWrite,
+				System.Drawing.Imaging.PixelFormat.Format24bppRgb);
 
-    BitmapData bmData = b.LockBits(new Rectangle(0, 0, width, height),
-        ImageLockMode.ReadOnly, PixelFormat.Format24bppRgb);
+			int stride = bmData.Stride;
+			IntPtr scan0 = bmData.Scan0;
 
-    int stride = bmData.Stride;
-    int nOffset = stride - width * 3;
-    unsafe
-    {
-        byte* p = (byte*)bmData.Scan0;
-        for (int y = 1; y < height - 1; y++)
-        {
-            for (int x = 1; x < width - 1; x++)
-            {
-                // Sobel X
-                double gx =
-                    -p[-stride - 3] - 2 * p[-3] - p[stride - 3] +
-                    p[-stride + 3] + 2 * p[3] + p[stride + 3];
+			unsafe
+			{
+				byte* p = (byte*)scan0;
 
-                // Sobel Y
-                double gy =
-                    -p[-stride - 3] - 2 * p[-stride] - p[-stride + 3] +
-                    p[stride - 3] + 2 * p[stride] + p[stride + 3];
+				float[,] Ix2 = new float[height, width];
+				float[,] Iy2 = new float[height, width];
+				float[,] IxIy = new float[height, width];
 
-                Ix[x, y] = gx;
-                Iy[x, y] = gy;
+				for (int y = 1; y < height - 1; y++)
+				{
+					for (int x = 1; x < width - 1; x++)
+					{
+						byte* pixel = p + y * stride + x * 3;
 
-                p += 3;
-            }
-            p += nOffset + 3; // skip last pixel
-        }
-    }
-    b.UnlockBits(bmData);
+						int gx = pixel[3] - pixel[-3];
+						int gy = pixel[stride] - pixel[-stride];
 
-    // Step 2: Compute Harris response
-    double[,] R = new double[width, height];
-    double maxR = 0;
+						Ix2[y, x] = gx * gx;
+						Iy2[y, x] = gy * gy;
+						IxIy[y, x] = gx * gy;
+					}
+				}
 
-    for (int y = 1; y < height - 1; y++)
-    {
-        for (int x = 1; x < width - 1; x++)
-        {
-            double ix = Ix[x, y];
-            double iy = Iy[x, y];
+				float[,] R = new float[height, width];
 
-            double ix2 = ix * ix;
-            double iy2 = iy * iy;
-            double ixy = ix * iy;
+				for (int y = 1; y < height - 1; y++)
+				{
+					for (int x = 1; x < width - 1; x++)
+					{
+						float sumIx2 = 0, sumIy2 = 0, sumIxIy = 0;
+						for (int wy = -1; wy <= 1; wy++)
+						{
+							for (int wx = -1; wx <= 1; wx++)
+							{
+								sumIx2 += Ix2[y + wy, x + wx];
+								sumIy2 += Iy2[y + wy, x + wx];
+								sumIxIy += IxIy[y + wy, x + wx];
+							}
+						}
 
-            double det = (ix2 * iy2) - (ixy * ixy);
-            double trace = ix2 + iy2;
+						float det = sumIx2 * sumIy2 - sumIxIy * sumIxIy;
+						float trace = sumIx2 + sumIy2;
+						R[y, x] = det - k * trace * trace;
+					}
+				}
 
-            double r = det - k * (trace * trace);
-            R[x, y] = r;
+				for (int y = windowRadius; y < height - windowRadius; y++)
+				{
+					for (int x = windowRadius; x < width - windowRadius; x++)
+					{
+						if (R[y, x] < threshold) continue;
 
-            if (r > maxR) maxR = r;
-        }
-    }
+						bool isMax = true;
+						for (int wy = -windowRadius; wy <= windowRadius && isMax; wy++)
+						{
+							for (int wx = -windowRadius; wx <= windowRadius; wx++)
+							{
+								if (R[y + wy, x + wx] > R[y, x])
+								{
+									isMax = false;
+									break;
+								}
+							}
+						}
 
-    // Step 3: Draw corners (threshold relative to maxR)
-    BitmapData bmDataOut = b.LockBits(new Rectangle(0, 0, width, height),
-        ImageLockMode.ReadWrite, PixelFormat.Format24bppRgb);
+						if (isMax)
+						{
+							byte* pixel = p + y * stride + x * 3;
+							pixel[0] = 0;
+							pixel[1] = 0;
+							pixel[2] = 255;
+						}
+					}
+				}
+			}
 
-    stride = bmDataOut.Stride;
-    nOffset = stride - width * 3;
-    unsafe
-    {
-        byte* p = (byte*)bmDataOut.Scan0;
-        for (int y = 1; y < height - 1; y++)
-        {
-            for (int x = 1; x < width - 1; x++)
-            {
-                if (R[x, y] > threshold)
-                {
-                    // Mark corner in red
-                    byte* pixel = p + y * stride + x * 3;
-                    pixel[0] = 0;    // B
-                    pixel[1] = 0;    // G
-                    pixel[2] = 255;  // R
-                }
-            }
-        }
-    }
-    b.UnlockBits(bmDataOut);
-}
+			b.UnlockBits(bmData);
+		}
+
 	}
 }

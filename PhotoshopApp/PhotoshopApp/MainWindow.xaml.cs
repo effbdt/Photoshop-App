@@ -132,32 +132,48 @@ namespace PhotoshopApp
 
 			string selectedFilter = FilterComboBox.SelectedItem.ToString();
 
-			var sw = Stopwatch.StartNew();
+			var sw = new Stopwatch();
 
 			switch (selectedFilter)
 			{
 				case "Invert":
+					sw = Stopwatch.StartNew();
 					ImageProcessing.InvertImage(loadedImage);
 					break;
 				case "Grayscale":
+					sw = Stopwatch.StartNew();
 					ImageProcessing.Grayscale(loadedImage);
 					break;
 				case "Gamma":
-					ImageProcessing.Gamma(loadedImage, 2.0, 2.0, 2.0);
+					GammaInputWindow gammaWindow = new GammaInputWindow();
+					gammaWindow.Owner = this;
+					if (gammaWindow.ShowDialog() == true)
+					{
+						sw = Stopwatch.StartNew();
+						ImageProcessing.Gamma(loadedImage,
+							gammaWindow.RedGamma,
+							gammaWindow.BlueGamma,
+							gammaWindow.GreenGamma);
+					}
 					break;
 				case "BoxFilter":
+					sw = Stopwatch.StartNew();
 					ImageProcessing.BoxFilter(loadedImage);
 					break;
 				case "GaussianBlur":
+					sw = Stopwatch.StartNew();
 					ImageProcessing.GaussianBlur(loadedImage);
 					break;
 				case "SobelEdgeDetector":
+					sw = Stopwatch.StartNew();
 					ImageProcessing.SobelEdgeDetector(loadedImage);
 					break;
 				case "LaplaceEdgeDetector":
+					sw = Stopwatch.StartNew();
 					ImageProcessing.LaplaceEdgeDetector(loadedImage);
 					break;
 				case "LogTransform":
+					sw = Stopwatch.StartNew();
 					ImageProcessing.LogTransform(loadedImage);
 					break;
 				case "Histogram":
@@ -166,18 +182,20 @@ namespace PhotoshopApp
 					histWindow.Show();
 					break;
 				case "HistogramEqualization":
+					sw = Stopwatch.StartNew();
 					ImageProcessing.HistogramEqualization(loadedImage);
 					break;
 				case "HarrisCornerDetector":
+					sw = Stopwatch.StartNew();
 					ImageProcessing.HarrisCornerDetector(loadedImage);
 					break;
 
 			}
 
 			sw.Stop();
+			MyImageControl.Source = ConvertToBitmapImage(loadedImage);
 			MessageBox.Show($"Filter applied in {sw.ElapsedMilliseconds} ms");
 
-			MyImageControl.Source = ConvertToBitmapImage(loadedImage);
 		}
 
 		private void SaveImageButton_Click(object sender, RoutedEventArgs e)

@@ -10,11 +10,11 @@ none
 false
 TRACE;DEBUG;NET;NET8_0;NETCOREAPP;WINDOWS;WINDOWS7_0;NET5_0_OR_GREATER;NET6_0_OR_GREATER;NET7_0_OR_GREATER;NET8_0_OR_GREATER;NETCOREAPP3_0_OR_GREATER;NETCOREAPP3_1_OR_GREATER;WINDOWS7_0_OR_GREATER
 C:\Users\DAVIDOF\Desktop\Egyetem XD\kepfeldolgozas\PhotosopAppFolder\PhotoshopApp\PhotoshopApp\App.xaml
-2836178748
+3719047444
 
-7-1905025558
+81355828438
 200445122018
-Histogram.xaml;MainWindow.xaml;
+Histogram.xaml;MainWindow.xaml;Services\GammaInputWindow.xaml;
 
 False
 

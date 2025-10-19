@@ -27,3 +27,5 @@ C:\Users\DAVIDOF\Desktop\Egyetem XD\kepfeldolgozas\PhotosopAppFolder\PhotoshopAp
 C:\Users\DAVIDOF\Desktop\Egyetem XD\kepfeldolgozas\PhotosopAppFolder\PhotoshopApp\PhotoshopApp\obj\Debug\net8.0-windows\Histogram.g.cs
 C:\Users\DAVIDOF\Desktop\Egyetem XD\kepfeldolgozas\PhotosopAppFolder\PhotoshopApp\PhotoshopApp\obj\Debug\net8.0-windows\PhotoshopApp_MarkupCompile.lref
 C:\Users\DAVIDOF\Desktop\Egyetem XD\kepfeldolgozas\PhotosopAppFolder\PhotoshopApp\PhotoshopApp\obj\Debug\net8.0-windows\Histogram.baml
+C:\Users\DAVIDOF\Desktop\Egyetem XD\kepfeldolgozas\PhotosopAppFolder\PhotoshopApp\PhotoshopApp\obj\Debug\net8.0-windows\Services\GammaInputWindow.g.cs
+C:\Users\DAVIDOF\Desktop\Egyetem XD\kepfeldolgozas\PhotosopAppFolder\PhotoshopApp\PhotoshopApp\obj\Debug\net8.0-windows\Services\GammaInputWindow.baml

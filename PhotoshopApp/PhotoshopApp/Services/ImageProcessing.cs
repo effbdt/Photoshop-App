@@ -19,22 +19,31 @@ namespace PhotoshopApp.Services
 				ImageLockMode.ReadWrite, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
 
 			int stride = bmData.Stride;
-			System.IntPtr Scan0 = bmData.Scan0;
+			IntPtr Scan0 = bmData.Scan0;
+
+			byte[] invertLUT = new byte[256];
+			for (int i = 0; i < 256; i++)
+			{
+				invertLUT[i] = (byte)(255 - i);
+			}
+
 			unsafe
 			{
-				byte* p = (byte*)(void*)Scan0;
-				int nOffset = stride - b.Width * 3;
-				int nWidth = b.Width * 3;
+				byte* pBase = (byte*)Scan0.ToPointer();
+
+				int nWidth = b.Width;
 				int nHeight = b.Height;
-				for (int y = 0; y < nHeight; ++y)
+				Parallel.For(0, nHeight, y =>
 				{
+					byte* p = pBase + y * stride;
 					for (int x = 0; x < nWidth; ++x)
 					{
-						p[0] = (byte)(255 - p[0]);
-						++p;
+						p[0] = invertLUT[p[0]];
+						p[1] = invertLUT[p[1]];
+						p[2] = invertLUT[p[2]];
+						p += 3;
 					}
-					p += nOffset;
-				}
+				});
 			}
 
 			b.UnlockBits(bmData);
@@ -46,120 +55,40 @@ namespace PhotoshopApp.Services
 				ImageLockMode.ReadWrite, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
 
 			int stride = bmData.Stride;
-			System.IntPtr Scan0 = bmData.Scan0;
+			IntPtr Scan0 = bmData.Scan0;
+
+			byte[] redLUT = new byte[256];
+			byte[] greenLUT = new byte[256];
+			byte[] blueLUT = new byte[256];
+			for (int i = 0; i < 256; i++)
+			{
+				redLUT[i] = (byte)((299 * i) / 1000);
+				greenLUT[i] = (byte)((587 * i) / 1000);
+				blueLUT[i] = (byte)((114 * i) / 1000);
+			}
 
 			unsafe
 			{
-				byte* p = (byte*)(void*)Scan0;
+				byte* pBase = (byte*)Scan0;
 
-				int nOffset = stride - b.Width * 3;
+				int nHeight = b.Height;
+				int nWidth = b.Width;
 
-				byte red, green, blue;
-
-				for (int y = 0; y < b.Height; ++y)
+				Parallel.For(0, nHeight, y =>
 				{
-					for (int x = 0; x < b.Width; ++x)
+					byte* p = pBase + y * stride;
+
+					for (int x = 0; x < nWidth; ++x)
 					{
-						blue = p[0];
-						green = p[1];
-						red = p[2];
-
-						p[0] = p[1] = p[2] = (byte)
-							(.299 * red + .587 * green + .114 * blue);
-
+						int gray = (redLUT[p[2]] + greenLUT[p[1]] + blueLUT[p[0]]);
+						p[0] = p[1] = p[2] = (byte)gray;
 						p += 3;
 					}
-					p += nOffset;
-				}
+				});
 			}
 
 			b.UnlockBits(bmData);
 		}
-
-		//public static void Brightness(Bitmap b, int value)
-		//{
-		//	BitmapData bmData = b.LockBits(new Rectangle(0, 0, b.Width, b.Height),
-		//		ImageLockMode.ReadWrite, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
-
-		//	int stride = bmData.Stride;
-		//	System.IntPtr Scan0 = bmData.Scan0;
-
-		//	unsafe
-		//	{
-		//		byte* p = (byte*)(void*)Scan0;
-
-		//		int nOffset = stride - b.Width * 3;
-		//		int nWidth = b.Width * 3;
-		//		int nHeight = b.Height;
-
-		//		for (int y = 0; y < b.Height; ++y)
-		//		{
-		//			for (int x = 0; x < nWidth; ++x)
-		//			{
-		//				int temp = (int)(p[0] + value);
-		//				if (temp < 0) temp = 0;
-		//				if (temp > 255) temp = 255;
-
-		//				p[0] = (byte)temp;
-		//				++p;
-		//			}
-		//			p += nOffset;
-		//		}
-		//	}
-
-		//	b.UnlockBits(bmData);
-		//}
-
-		//public static void Contrast(Bitmap b, int nContrast)
-		//{
-		//	if (nContrast < -100) nContrast = -100;
-		//	if (nContrast > 100) nContrast = 100;
-
-		//	BitmapData bmData = b.LockBits(new Rectangle(0, 0, b.Width, b.Height),
-		//		ImageLockMode.ReadWrite, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
-
-		//	int stride = bmData.Stride;
-		//	System.IntPtr Scan0 = bmData.Scan0;
-
-		//	double contrast = (100.0 + nContrast) / 100.0;
-		//	contrast *= contrast;
-
-		//	byte[] contrastLut = new byte[256];
-
-		//	for (int i = 0; i < 256; i++)
-		//	{
-		//		double pixel = i / 255.0;
-		//		pixel -= 0.5;
-		//		pixel *= contrast;
-		//		pixel += 0.5;
-		//		pixel *= 255;
-
-		//		if (pixel < 0) pixel = 0;
-		//		if (pixel > 255) pixel = 255;
-
-		//		contrastLut[i] = (byte)pixel;
-		//	}
-
-		//	unsafe
-		//	{
-		//		byte* p = (byte*)(void*)Scan0;
-		//		int nOffset = stride - b.Width * 3;
-
-		//		for (int y = 0; y < b.Height; ++y)
-		//		{
-		//			for (int x = 0; x < b.Width; ++x)
-		//			{
-		//				p[0] = contrastLut[p[0]];
-		//				p[1] = contrastLut[p[1]];
-		//				p[2] = contrastLut[p[2]];
-		//				p += 3;
-		//			}
-		//			p += nOffset;
-		//		}
-		//	}
-
-		//	b.UnlockBits(bmData);
-		//}
 
 		public static void Gamma(Bitmap b, double red, double blue, double green)
 		{
@@ -186,10 +115,10 @@ namespace PhotoshopApp.Services
 			unsafe
 			{
 
-				byte* p = (byte*)Scan0;
+				byte* pBase = (byte*)Scan0;
 				Parallel.For(0, height, y =>
 				{
-					byte* row = p + (y * stride);
+					byte* row = pBase + (y * stride);
 
 					for (int x = 0; x < width; x++)
 					{
@@ -222,75 +151,49 @@ namespace PhotoshopApp.Services
 			int stride = bmData.Stride;
 			int stride2 = stride * 2;
 
-			System.IntPtr Scan0 = bmData.Scan0;
-			System.IntPtr SrcScan0 = bmSrc.Scan0;
+			IntPtr Scan0 = bmData.Scan0;
+			IntPtr SrcScan0 = bmSrc.Scan0;
 
 			unsafe
 			{
-				byte* p = (byte*)(void*)Scan0;
-				byte* pSrc = (byte*)(void*)SrcScan0;
+				byte* pDestBase = (byte*)Scan0;
+				byte* pSrcBase = (byte*)SrcScan0;
+
 				int nOffset = stride - b.Width * 3;
 				int nWidth = b.Width - 2;
 				int nHeight = b.Height - 2;
 
-				int nPixel;
-
-				for (int y = 0; y < nHeight; ++y)
+				Parallel.For(0, nHeight, y =>
 				{
+					byte* pDest = pDestBase + (y + 1) * stride + 3;
+					byte* pSrcRow0 = pSrcBase + y * stride;
+					byte* pSrcRow1 = pSrcBase + (y + 1) * stride;
+					byte* pSrcRow2 = pSrcBase + (y + 2) * stride;
+
 					for (int x = 0; x < nWidth; ++x)
 					{
-						nPixel = ((((pSrc[2] * m.TopLeft) +
-							(pSrc[5] * m.TopMid) +
-							(pSrc[8] * m.TopRight) +
-							(pSrc[2 + stride] * m.MidLeft) +
-							(pSrc[5 + stride] * m.Pixel) +
-							(pSrc[8 + stride] * m.MidRight) +
-							(pSrc[2 + stride2] * m.BottomLeft) +
-							(pSrc[5 + stride2] * m.BottomMid) +
-							(pSrc[8 + stride2] * m.BottomRight))
-							/ m.Factor) + m.Offset);
+						int r = (pSrcRow0[2] * m.TopLeft + pSrcRow0[5] * m.TopMid + pSrcRow0[8] * m.TopRight +
+								 pSrcRow1[2] * m.MidLeft + pSrcRow1[5] * m.Pixel + pSrcRow1[8] * m.MidRight +
+								 pSrcRow2[2] * m.BottomLeft + pSrcRow2[5] * m.BottomMid + pSrcRow2[8] * m.BottomRight) / m.Factor + m.Offset;
 
-						if (nPixel < 0) nPixel = 0;
-						if (nPixel > 255) nPixel = 255;
-						p[5 + stride] = (byte)nPixel;
+						int g = (pSrcRow0[1] * m.TopLeft + pSrcRow0[4] * m.TopMid + pSrcRow0[7] * m.TopRight +
+								pSrcRow1[1] * m.MidLeft + pSrcRow1[4] * m.Pixel + pSrcRow1[7] * m.MidRight +
+								pSrcRow2[1] * m.BottomLeft + pSrcRow2[4] * m.BottomMid + pSrcRow2[7] * m.BottomRight) / m.Factor + m.Offset;
 
-						nPixel = ((((pSrc[1] * m.TopLeft) +
-							(pSrc[4] * m.TopMid) +
-							(pSrc[7] * m.TopRight) +
-							(pSrc[1 + stride] * m.MidLeft) +
-							(pSrc[4 + stride] * m.Pixel) +
-							(pSrc[7 + stride] * m.MidRight) +
-							(pSrc[1 + stride2] * m.BottomLeft) +
-							(pSrc[4 + stride2] * m.BottomMid) +
-							(pSrc[7 + stride2] * m.BottomRight))
-							/ m.Factor) + m.Offset);
+						int b = (pSrcRow0[0] * m.TopLeft + pSrcRow0[3] * m.TopMid + pSrcRow0[6] * m.TopRight +
+								pSrcRow1[0] * m.MidLeft + pSrcRow1[3] * m.Pixel + pSrcRow1[6] * m.MidRight +
+								pSrcRow2[0] * m.BottomLeft + pSrcRow2[3] * m.BottomMid + pSrcRow2[6] * m.BottomRight) / m.Factor + m.Offset;
 
-						if (nPixel < 0) nPixel = 0;
-						if (nPixel > 255) nPixel = 255;
-						p[4 + stride] = (byte)nPixel;
+						pDest[2] = (byte)Math.Max(0, Math.Min(255, r));
+						pDest[1] = (byte)Math.Max(0, Math.Min(255, g));
+						pDest[0] = (byte)Math.Max(0, Math.Min(255, b));
 
-						nPixel = ((((pSrc[0] * m.TopLeft) +
-									   (pSrc[3] * m.TopMid) +
-									   (pSrc[6] * m.TopRight) +
-									   (pSrc[0 + stride] * m.MidLeft) +
-									   (pSrc[3 + stride] * m.Pixel) +
-									   (pSrc[6 + stride] * m.MidRight) +
-									   (pSrc[0 + stride2] * m.BottomLeft) +
-									   (pSrc[3 + stride2] * m.BottomMid) +
-									   (pSrc[6 + stride2] * m.BottomRight))
-							/ m.Factor) + m.Offset);
-
-						if (nPixel < 0) nPixel = 0;
-						if (nPixel > 255) nPixel = 255;
-						p[3 + stride] = (byte)nPixel;
-
-						p += 3;
-						pSrc += 3;
+						pDest += 3;
+						pSrcRow0 += 3;
+						pSrcRow1 += 3;
+						pSrcRow2 += 3;
 					}
-
-					p += nOffset;
-					pSrc += nOffset;
-				}
+				});
 			}
 
 			b.UnlockBits(bmData);

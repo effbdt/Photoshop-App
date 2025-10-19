@@ -24,3 +24,6 @@ C:\Users\DAVIDOF\Desktop\Egyetem XD\kepfeldolgozas\PhotosopAppFolder\PhotoshopAp
 C:\Users\DAVIDOF\Desktop\Egyetem XD\kepfeldolgozas\PhotosopAppFolder\PhotoshopApp\PhotoshopApp\obj\Debug\net8.0-windows\PhotoshopApp.csproj.AssemblyReference.cache
 C:\Users\DAVIDOF\Desktop\Egyetem XD\kepfeldolgozas\PhotosopAppFolder\PhotoshopApp\PhotoshopApp\obj\Debug\net8.0-windows\PhotoshopApp.sourcelink.json
 C:\Users\DAVIDOF\Desktop\Egyetem XD\kepfeldolgozas\PhotosopAppFolder\PhotoshopApp\PhotoshopApp\obj\Debug\net8.0-windows\Photosho.39FCF9F0.Up2Date
+C:\Users\DAVIDOF\Desktop\Egyetem XD\kepfeldolgozas\PhotosopAppFolder\PhotoshopApp\PhotoshopApp\obj\Debug\net8.0-windows\Histogram.g.cs
+C:\Users\DAVIDOF\Desktop\Egyetem XD\kepfeldolgozas\PhotosopAppFolder\PhotoshopApp\PhotoshopApp\obj\Debug\net8.0-windows\PhotoshopApp_MarkupCompile.lref
+C:\Users\DAVIDOF\Desktop\Egyetem XD\kepfeldolgozas\PhotosopAppFolder\PhotoshopApp\PhotoshopApp\obj\Debug\net8.0-windows\Histogram.baml

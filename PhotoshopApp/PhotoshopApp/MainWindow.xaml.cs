@@ -37,6 +37,7 @@ namespace PhotoshopApp
 			FilterComboBox.Items.Add("SobelEdgeDetector");
 			FilterComboBox.Items.Add("LaplaceEdgeDetector");
 			FilterComboBox.Items.Add("LogTransform");
+			FilterComboBox.Items.Add("Histogram");
 			FilterComboBox.Items.Add("HistogramEqualization");
 			FilterComboBox.Items.Add("HarrisCornerDetector");
 
@@ -158,6 +159,11 @@ namespace PhotoshopApp
 					break;
 				case "LogTransform":
 					ImageProcessing.LogTransform(loadedImage);
+					break;
+				case "Histogram":
+					int[] hist = ImageProcessing.Histogram(loadedImage);
+					Histogram histWindow = new Histogram(hist);
+					histWindow.Show();
 					break;
 				case "HistogramEqualization":
 					ImageProcessing.HistogramEqualization(loadedImage);

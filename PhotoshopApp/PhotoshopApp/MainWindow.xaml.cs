@@ -1,5 +1,6 @@
 ﻿using Microsoft.Win32;
 using PhotoshopApp.Services;
+using System.Diagnostics;
 using System.Drawing;
 using System.Drawing;
 using System.Drawing.Imaging;
@@ -130,6 +131,8 @@ namespace PhotoshopApp
 
 			string selectedFilter = FilterComboBox.SelectedItem.ToString();
 
+			var sw = Stopwatch.StartNew();
+
 			switch (selectedFilter)
 			{
 				case "Invert":
@@ -164,6 +167,9 @@ namespace PhotoshopApp
 					break;
 
 			}
+
+			sw.Stop();
+			MessageBox.Show($"Filter applied in {sw.ElapsedMilliseconds} ms");
 
 			MyImageControl.Source = ConvertToBitmapImage(loadedImage);
 		}

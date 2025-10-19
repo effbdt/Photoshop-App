@@ -6,7 +6,6 @@ C:\Users\DAVIDOF\Desktop\Egyetem XD\kepfeldolgozas\PhotosopAppFolder\PhotoshopAp
 C:\Users\DAVIDOF\Desktop\Egyetem XD\kepfeldolgozas\PhotosopAppFolder\PhotoshopApp\PhotoshopApp\obj\Debug\net8.0-windows\MainWindow.g.cs
 C:\Users\DAVIDOF\Desktop\Egyetem XD\kepfeldolgozas\PhotosopAppFolder\PhotoshopApp\PhotoshopApp\obj\Debug\net8.0-windows\App.g.cs
 C:\Users\DAVIDOF\Desktop\Egyetem XD\kepfeldolgozas\PhotosopAppFolder\PhotoshopApp\PhotoshopApp\obj\Debug\net8.0-windows\PhotoshopApp_MarkupCompile.cache
-C:\Users\DAVIDOF\Desktop\Egyetem XD\kepfeldolgozas\PhotosopAppFolder\PhotoshopApp\PhotoshopApp\obj\Debug\net8.0-windows\PhotoshopApp_MarkupCompile.lref
 C:\Users\DAVIDOF\Desktop\Egyetem XD\kepfeldolgozas\PhotosopAppFolder\PhotoshopApp\PhotoshopApp\obj\Debug\net8.0-windows\MainWindow.baml
 C:\Users\DAVIDOF\Desktop\Egyetem XD\kepfeldolgozas\PhotosopAppFolder\PhotoshopApp\PhotoshopApp\obj\Debug\net8.0-windows\PhotoshopApp.g.resources
 C:\Users\DAVIDOF\Desktop\Egyetem XD\kepfeldolgozas\PhotosopAppFolder\PhotoshopApp\PhotoshopApp\obj\Debug\net8.0-windows\PhotoshopApp.GeneratedMSBuildEditorConfig.editorconfig

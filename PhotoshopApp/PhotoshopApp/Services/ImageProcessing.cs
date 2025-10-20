@@ -320,6 +320,8 @@ namespace PhotoshopApp.Services
 				{
 					IntPtr srcPtr = handle.AddrOfPinnedObject();
 
+
+
 					Parallel.For(1, height - 1, y =>
 					{
 						byte* srcBase = (byte*)srcPtr;
@@ -406,12 +408,15 @@ namespace PhotoshopApp.Services
 			m.BottomLeft = 0; m.BottomMid = -1; m.BottomRight = 0;
 
 			m.Factor = 1;
-			m.Offset = 128;
+			m.Offset = 0;
 			Conv3x3(b, m);
 		}
 
 		public static void LogTransform(Bitmap b)
 		{
+			int width = b.Width;
+			int height = b.Height;
+
 			BitmapData bmData = b.LockBits(new Rectangle(0, 0, b.Width, b.Height),
 		ImageLockMode.ReadWrite, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
 
@@ -428,21 +433,21 @@ namespace PhotoshopApp.Services
 
 			unsafe
 			{
-				byte* p = (byte*)(void*)Scan0;
-				int nOffset = stride - b.Width * 3;
+				byte* p = (byte*)Scan0;
 
-				for (int y = 0; y < b.Height; ++y)
+				Parallel.For(0, height, y =>
 				{
-					for (int x = 0; x < b.Width; ++x)
-					{
-						p[0] = logLUT[p[0]];
-						p[1] = logLUT[p[1]];
-						p[2] = logLUT[p[2]];
+					byte* row = p + y * stride;
 
-						p += 3;
+					for (int x = 0; x < width; ++x)
+					{
+						row[0] = logLUT[row[0]];
+						row[1] = logLUT[row[1]];
+						row[2] = logLUT[row[2]];
+
+						row += 3;
 					}
-					p += nOffset;
-				}
+				});
 			}
 
 			b.UnlockBits(bmData);
@@ -452,6 +457,19 @@ namespace PhotoshopApp.Services
 		{
 			int[] hist = new int[256];
 
+			int width = b.Width;
+			int height = b.Height;
+
+			byte[] redLUT = new byte[256];
+			byte[] greenLUT = new byte[256];
+			byte[] blueLUT = new byte[256];
+			for (int i = 0; i < 256; i++)
+			{
+				redLUT[i] = (byte)(.299 * i);
+				greenLUT[i] = (byte)(.587 * i);
+				blueLUT[i] = (byte)(.114 * i);
+			}
+
 			BitmapData bmData = b.LockBits(new Rectangle(0, 0, b.Width, b.Height),
 		ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
 
@@ -460,25 +478,37 @@ namespace PhotoshopApp.Services
 
 			unsafe
 			{
-				byte* p = (byte*)(void*)Scan0;
-				int nOffset = stride - b.Width * 3;
-
-				for (int y = 0; y < b.Height; y++)
+				byte* pBase = (byte*)Scan0;
+				int[][] localHists = new int[Environment.ProcessorCount][];
+				for (int i = 0; i < localHists.Length; i++)
 				{
-					for (int x = 0; x < b.Width; x++)
-					{
-						byte blue = p[0];
-						byte green = p[1];
-						byte red = p[2];
-
-						int intensity = (int)(0.299 * red + 0.587 * green + 0.114 * blue);
-
-						hist[intensity]++;
-
-						p += 3;
-					}
-					p += nOffset;
+					localHists[i] = new int[256];
 				}
+
+				Parallel.For(0, height, y =>
+				{
+					int threadId = System.Threading.Thread.CurrentThread.ManagedThreadId % localHists.Length;
+					int[] localHist = localHists[threadId];
+
+					byte* row = pBase + y * stride;
+
+					for (int x = 0; x < width; x++)
+					{
+						int intensity = (int)(redLUT[row[2]] + greenLUT[row[1]] + blueLUT[row[0]]);
+						localHist[intensity]++;
+						row += 3;
+					}
+
+				});
+
+				for (int t = 0; t < localHists.Length; t++)
+				{
+					for (int i = 0; i < 256; i++)
+					{
+						hist[i] += localHists[t][i];
+					}
+				}
+
 			}
 
 			b.UnlockBits(bmData);

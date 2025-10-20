@@ -139,10 +139,12 @@ namespace PhotoshopApp
 				case "Invert":
 					sw = Stopwatch.StartNew();
 					ImageProcessing.InvertImage(loadedImage);
+					sw.Stop();
 					break;
 				case "Grayscale":
 					sw = Stopwatch.StartNew();
 					ImageProcessing.Grayscale(loadedImage);
+					sw.Stop();
 					break;
 				case "Gamma":
 					GammaInputWindow gammaWindow = new GammaInputWindow();
@@ -155,44 +157,53 @@ namespace PhotoshopApp
 							gammaWindow.BlueGamma,
 							gammaWindow.GreenGamma);
 					}
+					sw.Stop();
 					break;
 				case "BoxFilter":
 					sw = Stopwatch.StartNew();
 					ImageProcessing.BoxFilter(loadedImage);
+					sw.Stop();
 					break;
 				case "GaussianBlur":
 					sw = Stopwatch.StartNew();
 					ImageProcessing.GaussianBlur(loadedImage);
+					sw.Stop();
 					break;
 				case "SobelEdgeDetector":
 					sw = Stopwatch.StartNew();
 					ImageProcessing.SobelEdgeDetector(loadedImage);
+					sw.Stop();
 					break;
 				case "LaplaceEdgeDetector":
 					sw = Stopwatch.StartNew();
 					ImageProcessing.LaplaceEdgeDetector(loadedImage);
+					sw.Stop();
 					break;
 				case "LogTransform":
 					sw = Stopwatch.StartNew();
 					ImageProcessing.LogTransform(loadedImage);
+					sw.Stop();
 					break;
 				case "Histogram":
+					sw = Stopwatch.StartNew();
 					int[] hist = ImageProcessing.Histogram(loadedImage);
+					sw.Stop();
 					Histogram histWindow = new Histogram(hist);
 					histWindow.Show();
 					break;
 				case "HistogramEqualization":
 					sw = Stopwatch.StartNew();
 					ImageProcessing.HistogramEqualization(loadedImage);
+					sw.Stop();
 					break;
 				case "HarrisCornerDetector":
 					sw = Stopwatch.StartNew();
 					ImageProcessing.HarrisCornerDetector(loadedImage);
+					sw.Stop();
 					break;
 
 			}
 
-			sw.Stop();
 			MyImageControl.Source = ConvertToBitmapImage(loadedImage);
 			MessageBox.Show($"Filter applied in {sw.ElapsedMilliseconds} ms");
 

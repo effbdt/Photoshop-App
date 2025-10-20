@@ -530,7 +530,6 @@ namespace PhotoshopApp.Services
 			for (int i = 0; i < 256; i++)
 			{
 				lut[i] = (byte)Math.Round((cdf[i] - cdf[0]) * scale);
-				if (lut[i] < 0) lut[i] = 0;
 				if (lut[i] > 255) lut[i] = 255;
 			}
 
@@ -540,22 +539,27 @@ namespace PhotoshopApp.Services
 			int stride = bmData.Stride;
 			IntPtr Scan0 = bmData.Scan0;
 
+			int width = b.Width;
+			int height = b.Height;
+
 			unsafe
 			{
-				byte* p = (byte*)(void*)Scan0;
-				int nOffset = stride - b.Width * 3;
+				byte* pBase = (byte*)Scan0;
 
-				for (int y = 0; y < b.Height; y++)
+
+				Parallel.For(0, height, y =>
 				{
-					for (int x = 0; x < b.Width; x++)
+					byte* row = pBase + y * stride;
+
+					for (int x = 0; x < width; x++)
 					{
-						p[0] = lut[p[0]];
-						p[1] = lut[p[1]];
-						p[2] = lut[p[2]];
-						p += 3;
+						row[0] = lut[row[0]];
+						row[1] = lut[row[1]];
+						row[2] = lut[row[2]];
+
+						row += 3;
 					}
-					p += nOffset;
-				}
+				});
 			}
 
 			b.UnlockBits(bmData);

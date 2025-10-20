@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Media;
@@ -136,7 +137,7 @@ namespace PhotoshopApp.Services
 
 		public static void Conv3x3(Bitmap b, ConvMatrix m)
 		{
-			if (0 == m.Factor)
+			if (m.Factor == 0)
 				return;
 
 			Bitmap bSrc = (Bitmap)b.Clone();
@@ -220,72 +221,181 @@ namespace PhotoshopApp.Services
 			Conv3x3(b, m);
 		}
 
+		//public static void SobelEdgeDetector(Bitmap b)
+		//{
+		//	Bitmap bX = (Bitmap)b.Clone();
+		//	Bitmap bY = (Bitmap)b.Clone();
+
+		//	ConvMatrix mx = new ConvMatrix();
+		//	mx.TopLeft = -1; mx.TopMid = 0; mx.TopRight = 1;
+		//	mx.MidLeft = -2; mx.Pixel = 0; mx.MidRight = 2;
+		//	mx.BottomLeft = -1; mx.BottomMid = 0; mx.BottomRight = 1;
+		//	mx.Factor = 1;
+		//	mx.Offset = 0;
+
+		//	ConvMatrix my = new ConvMatrix();
+		//	my.TopLeft = -1; my.TopMid = -2; my.TopRight = -1;
+		//	my.MidLeft = 0; my.Pixel = 0; my.MidRight = 0;
+		//	my.BottomLeft = 1; my.BottomMid = 2; my.BottomRight = 1;
+		//	my.Factor = 1;
+		//	my.Offset = 0;
+
+		//	Conv3x3(bX, mx);
+		//	Conv3x3(bY, my);
+
+		//	BitmapData bmData = b.LockBits(new Rectangle(0, 0, b.Width, b.Height),
+		//		ImageLockMode.ReadWrite, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
+		//	BitmapData bmX = bX.LockBits(new Rectangle(0, 0, b.Width, b.Height),
+		//		ImageLockMode.ReadWrite, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
+		//	BitmapData bmY = bY.LockBits(new Rectangle(0, 0, b.Width, b.Height),
+		//		ImageLockMode.ReadWrite, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
+
+		//	int stride = bmData.Stride;
+		//	int offset = stride - b.Width * 3;
+
+		//	unsafe
+		//	{
+		//		byte* p = (byte*)bmData.Scan0;
+		//		byte* px = (byte*)bmX.Scan0;
+		//		byte* py = (byte*)bmY.Scan0;
+
+		//		for (int y = 0; y < b.Height; y++)
+		//		{
+		//			for (int x = 0; x < b.Width; x++)
+		//			{
+		//				for (int c = 0; c < 3; c++)
+		//				{
+		//					int gx = px[c];
+		//					int gy = py[c];
+		//					int g = (int)Math.Sqrt(gx * gx + gy * gy);
+		//					if (g > 255) g = 255;
+		//					p[c] = (byte)g;
+		//				}
+
+		//				p += 3;
+		//				px += 3;
+		//				py += 3;
+		//			}
+
+		//			p += offset;
+		//			px += offset;
+		//			py += offset;
+		//		}
+		//	}
+
+		//	b.UnlockBits(bmData);
+		//	bX.UnlockBits(bmX);
+		//	bY.UnlockBits(bmY);
+		//}
+
 		public static void SobelEdgeDetector(Bitmap b)
 		{
-			Bitmap bX = (Bitmap)b.Clone();
-			Bitmap bY = (Bitmap)b.Clone();
+			int width = b.Width;
+			int height = b.Height;
 
-			ConvMatrix mx = new ConvMatrix();
-			mx.TopLeft = -1; mx.TopMid = 0; mx.TopRight = 1;
-			mx.MidLeft = -2; mx.Pixel = 0; mx.MidRight = 2;
-			mx.BottomLeft = -1; mx.BottomMid = 0; mx.BottomRight = 1;
-			mx.Factor = 1;
-			mx.Offset = 0;
-
-			ConvMatrix my = new ConvMatrix();
-			my.TopLeft = -1; my.TopMid = -2; my.TopRight = -1;
-			my.MidLeft = 0; my.Pixel = 0; my.MidRight = 0;
-			my.BottomLeft = 1; my.BottomMid = 2; my.BottomRight = 1;
-			my.Factor = 1;
-			my.Offset = 0;
-
-			Conv3x3(bX, mx);
-			Conv3x3(bY, my);
-
-			BitmapData bmData = b.LockBits(new Rectangle(0, 0, b.Width, b.Height),
-				ImageLockMode.ReadWrite, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
-			BitmapData bmX = bX.LockBits(new Rectangle(0, 0, b.Width, b.Height),
-				ImageLockMode.ReadWrite, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
-			BitmapData bmY = bY.LockBits(new Rectangle(0, 0, b.Width, b.Height),
-				ImageLockMode.ReadWrite, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
+			BitmapData bmData = b.LockBits(
+				new Rectangle(0, 0, width, height),
+				ImageLockMode.ReadWrite,
+				System.Drawing.Imaging.PixelFormat.Format24bppRgb);
 
 			int stride = bmData.Stride;
-			int offset = stride - b.Width * 3;
+			int totalBytes = stride * height;
+
+			byte[] original = new byte[totalBytes];
+			System.Runtime.InteropServices.Marshal.Copy(bmData.Scan0, original, 0, totalBytes);
+
+			int max = 2040;
+			byte[] LUT = new byte[max + 1];
+			for (int i = 0; i <= max; i++)
+			{
+				LUT[i] = (byte)(i > 255 ? 255 : i);
+			}
 
 			unsafe
 			{
-				byte* p = (byte*)bmData.Scan0;
-				byte* px = (byte*)bmX.Scan0;
-				byte* py = (byte*)bmY.Scan0;
+				byte* dstBase = (byte*)bmData.Scan0;
 
-				for (int y = 0; y < b.Height; y++)
+				GCHandle handle = GCHandle.Alloc(original, GCHandleType.Pinned);
+				try
 				{
-					for (int x = 0; x < b.Width; x++)
+					IntPtr srcPtr = handle.AddrOfPinnedObject();
+
+					Parallel.For(1, height - 1, y =>
 					{
-						for (int c = 0; c < 3; c++)
+						byte* srcBase = (byte*)srcPtr;
+						byte* dstRow = dstBase + y * stride;
+						byte* srcPrev = srcBase + (y - 1) * stride;
+						byte* srcCur = srcBase + y * stride;
+						byte* srcNext = srcBase + (y + 1) * stride;
+
+						for (int x = 1; x < width - 1; x++)
 						{
-							int gx = px[c];
-							int gy = py[c];
-							int g = (int)Math.Sqrt(gx * gx + gy * gy);
-							if (g > 255) g = 255;
-							p[c] = (byte)g;
+							int baseIdx = x * 3;
+							int leftIdx = baseIdx - 3;
+							int rightIdx = baseIdx + 3;
+
+							byte* topLeft = srcPrev + leftIdx;
+							byte* topCenter = srcPrev + baseIdx;
+							byte* topRight = srcPrev + rightIdx;
+
+							byte* midLeft = srcCur + leftIdx;
+							byte* midRight = srcCur + rightIdx;
+
+							byte* botLeft = srcNext + leftIdx;
+							byte* botCenter = srcNext + baseIdx;
+							byte* botRight = srcNext + rightIdx;
+
+							int tlB = topLeft[0]; int tlG = topLeft[1]; int tlR = topLeft[2];
+							int tcB = topCenter[0]; int tcG = topCenter[1]; int tcR = topCenter[2];
+							int trB = topRight[0]; int trG = topRight[1]; int trR = topRight[2];
+
+							int mlB = midLeft[0]; int mlG = midLeft[1]; int mlR = midLeft[2];
+							int mrB = midRight[0]; int mrG = midRight[1]; int mrR = midRight[2];
+
+							int blB = botLeft[0]; int blG = botLeft[1]; int blR = botLeft[2];
+							int bcB = botCenter[0]; int bcG = botCenter[1]; int bcR = botCenter[2];
+							int brB = botRight[0]; int brG = botRight[1]; int brR = botRight[2];
+
+							int gxB = (-tlB - 2 * mlB - blB) + (trB + 2 * mrB + brB);
+							int gxG = (-tlG - 2 * mlG - blG) + (trG + 2 * mrG + brG);
+							int gxR = (-tlR - 2 * mlR - blR) + (trR + 2 * mrR + brR);
+
+							int gyB = (-tlB - 2 * tcB - trB) + (blB + 2 * bcB + brB);
+							int gyG = (-tlG - 2 * tcG - trG) + (blG + 2 * bcG + brG);
+							int gyR = (-tlR - 2 * tcR - trR) + (blR + 2 * bcR + brR);
+
+							int absGxB = gxB < 0 ? -gxB : gxB;
+							int absGyB = gyB < 0 ? -gyB : gyB;
+							byte valB = LUT[absGxB + absGyB];
+
+							int absGxG = gxG < 0 ? -gxG : gxG;
+							int absGyG = gyG < 0 ? -gyG : gyG;
+							byte valG = LUT[absGxG + absGyG];
+
+							int absGxR = gxR < 0 ? -gxR : gxR;
+							int absGyR = gyR < 0 ? -gyR : gyR;
+							byte valR = LUT[absGxR + absGyR];
+
+							byte* dstPixel = dstRow + baseIdx;
+							dstPixel[0] = valB;
+							dstPixel[1] = valG;
+							dstPixel[2] = valR;
 						}
 
-						p += 3;
-						px += 3;
-						py += 3;
-					}
-
-					p += offset;
-					px += offset;
-					py += offset;
+						dstRow[0] = dstRow[1] = dstRow[2] = 0;
+						int rb = (width - 1) * 3;
+						dstRow[rb + 0] = dstRow[rb + 1] = dstRow[rb + 2] = 0;
+					});
+				}
+				finally
+				{
+					handle.Free();
 				}
 			}
 
 			b.UnlockBits(bmData);
-			bX.UnlockBits(bmX);
-			bY.UnlockBits(bmY);
 		}
+
 
 		public static void LaplaceEdgeDetector(Bitmap b)
 		{
@@ -343,7 +453,7 @@ namespace PhotoshopApp.Services
 			int[] hist = new int[256];
 
 			BitmapData bmData = b.LockBits(new Rectangle(0, 0, b.Width, b.Height),
-	   ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
+		ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
 
 			int stride = bmData.Stride;
 			IntPtr Scan0 = bmData.Scan0;

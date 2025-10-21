@@ -565,15 +565,114 @@ namespace PhotoshopApp.Services
 			b.UnlockBits(bmData);
 		}
 
+		//public static void HarrisCornerDetector(Bitmap b)
+		//{
+		//	const float k = 0.04f;
+		//	const float threshold = 1000000f;
+		//	const int windowRadius = 1;
+
+		//	int width = b.Width;
+		//	int height = b.Height;
+
+		//	BitmapData bmData = b.LockBits(
+		//		new Rectangle(0, 0, width, height),
+		//		ImageLockMode.ReadWrite,
+		//		System.Drawing.Imaging.PixelFormat.Format24bppRgb);
+
+		//	int stride = bmData.Stride;
+		//	IntPtr scan0 = bmData.Scan0;
+
+		//	unsafe
+		//	{
+		//		byte* p = (byte*)scan0;
+
+		//		float[,] Ix2 = new float[height, width];
+		//		float[,] Iy2 = new float[height, width];
+		//		float[,] IxIy = new float[height, width];
+
+		//		for (int y = 1; y < height - 1; y++)
+		//		{
+		//			for (int x = 1; x < width - 1; x++)
+		//			{
+		//				byte* pixel = p + y * stride + x * 3;
+
+		//				int gx = pixel[3] - pixel[-3];
+		//				int gy = pixel[stride] - pixel[-stride];
+
+		//				Ix2[y, x] = gx * gx;
+		//				Iy2[y, x] = gy * gy;
+		//				IxIy[y, x] = gx * gy;
+		//			}
+		//		}
+
+		//		float[,] R = new float[height, width];
+
+		//		for (int y = 1; y < height - 1; y++)
+		//		{
+		//			for (int x = 1; x < width - 1; x++)
+		//			{
+		//				float sumIx2 = 0, sumIy2 = 0, sumIxIy = 0;
+		//				for (int wy = -1; wy <= 1; wy++)
+		//				{
+		//					for (int wx = -1; wx <= 1; wx++)
+		//					{
+		//						sumIx2 += Ix2[y + wy, x + wx];
+		//						sumIy2 += Iy2[y + wy, x + wx];
+		//						sumIxIy += IxIy[y + wy, x + wx];
+		//					}
+		//				}
+
+		//				float det = sumIx2 * sumIy2 - sumIxIy * sumIxIy;
+		//				float trace = sumIx2 + sumIy2;
+		//				R[y, x] = det - k * trace * trace;
+		//			}
+		//		}
+
+		//		for (int y = windowRadius; y < height - windowRadius; y++)
+		//		{
+		//			for (int x = windowRadius; x < width - windowRadius; x++)
+		//			{
+		//				if (R[y, x] < threshold) continue;
+
+		//				bool isMax = true;
+		//				for (int wy = -windowRadius; wy <= windowRadius && isMax; wy++)
+		//				{
+		//					for (int wx = -windowRadius; wx <= windowRadius; wx++)
+		//					{
+		//						if (R[y + wy, x + wx] > R[y, x])
+		//						{
+		//							isMax = false;
+		//							break;
+		//						}
+		//					}
+		//				}
+
+		//				if (isMax)
+		//				{
+		//					byte* pixel = p + y * stride + x * 3;
+		//					pixel[0] = 0;
+		//					pixel[1] = 0;
+		//					pixel[2] = 255;
+		//				}
+		//			}
+		//		}
+		//	}
+
+		//	b.UnlockBits(bmData);
+		//}
+
+		//big iamge 3700ms
+		//1080 190ms
+		//new 750ms
 		public static void HarrisCornerDetector(Bitmap b)
 		{
-			const float k = 0.04f;
+			const float k = 0.06f;
 			const float threshold = 1000000f;
-			const int windowRadius = 1;
 
 			int width = b.Width;
 			int height = b.Height;
 
+			byte[] gray = new byte[width * height];
 			BitmapData bmData = b.LockBits(
 				new Rectangle(0, 0, width, height),
 				ImageLockMode.ReadWrite,
@@ -586,76 +685,76 @@ namespace PhotoshopApp.Services
 			{
 				byte* p = (byte*)scan0;
 
-				float[,] Ix2 = new float[height, width];
-				float[,] Iy2 = new float[height, width];
-				float[,] IxIy = new float[height, width];
-
-				for (int y = 1; y < height - 1; y++)
+				for (int y = 0; y < height; y++)
 				{
-					for (int x = 1; x < width - 1; x++)
+					byte* row = p + y * stride;
+					for (int x = 0; x < width; x++)
 					{
-						byte* pixel = p + y * stride + x * 3;
-
-						int gx = pixel[3] - pixel[-3];
-						int gy = pixel[stride] - pixel[-stride];
-
-						Ix2[y, x] = gx * gx;
-						Iy2[y, x] = gy * gy;
-						IxIy[y, x] = gx * gy;
+						gray[y * width + x] = (byte)(0.299 * row[2] + 0.587 * row[1] + 0.114 * row[0]);
+						row += 3;
 					}
 				}
 
-				float[,] R = new float[height, width];
+				float[] Ix2 = new float[width * height];
+				float[] Iy2 = new float[width * height];
+				float[] IxIy = new float[width * height];
 
-				for (int y = 1; y < height - 1; y++)
+				Parallel.For(1, height - 1, y =>
 				{
 					for (int x = 1; x < width - 1; x++)
 					{
+						int idx = y * width + x;
+						int gx = gray[idx + 1] - gray[idx - 1];
+						int gy = gray[idx + width] - gray[idx - width];
+						Ix2[idx] = gx * gx;
+						Iy2[idx] = gy * gy;
+						IxIy[idx] = gx * gy;
+
+					}
+				});
+
+				float[] R = new float[width * height];
+
+				Parallel.For(1, height - 1, y =>
+				{
+					for (int x = 1; x < width - 1; x++)
+					{
+						int idx = y * width + x;
 						float sumIx2 = 0, sumIy2 = 0, sumIxIy = 0;
 						for (int wy = -1; wy <= 1; wy++)
 						{
+							int rowOffset = (y + wy) * width;
 							for (int wx = -1; wx <= 1; wx++)
 							{
-								sumIx2 += Ix2[y + wy, x + wx];
-								sumIy2 += Iy2[y + wy, x + wx];
-								sumIxIy += IxIy[y + wy, x + wx];
+								int i = rowOffset + (x + wx);
+								sumIx2 += Ix2[i];
+								sumIy2 += Iy2[i];
+								sumIxIy += IxIy[i];
 							}
+
 						}
 
 						float det = sumIx2 * sumIy2 - sumIxIy * sumIxIy;
 						float trace = sumIx2 + sumIy2;
-						R[y, x] = det - k * trace * trace;
+						R[idx] = det - k * trace * trace;
 					}
-				}
+				});
 
-				for (int y = windowRadius; y < height - windowRadius; y++)
+				for (int y = 1; y < height; y++)
 				{
-					for (int x = windowRadius; x < width - windowRadius; x++)
+					byte* row = p + y * stride;
+					for (int x = 0; x < width; x++)
 					{
-						if (R[y, x] < threshold) continue;
-
-						bool isMax = true;
-						for (int wy = -windowRadius; wy <= windowRadius && isMax; wy++)
+						int idx = y * width + x;
+						if (R[idx] > threshold)
 						{
-							for (int wx = -windowRadius; wx <= windowRadius; wx++)
-							{
-								if (R[y + wy, x + wx] > R[y, x])
-								{
-									isMax = false;
-									break;
-								}
-							}
-						}
-
-						if (isMax)
-						{
-							byte* pixel = p + y * stride + x * 3;
-							pixel[0] = 0;
-							pixel[1] = 0;
-							pixel[2] = 255;
+							row[x * 3 + 0] = 0;
+							row[x * 3 + 1] = 0;
+							row[x * 3 + 2] = 255;
 						}
 					}
 				}
+
 			}
 
 			b.UnlockBits(bmData);

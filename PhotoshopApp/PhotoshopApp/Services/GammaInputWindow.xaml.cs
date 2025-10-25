@@ -31,8 +31,8 @@ namespace PhotoshopApp.Services
 		private void OkButton_Click(object sender, RoutedEventArgs e)
 		{
 			RedGamma = RedSlider.Value;
-			RedGamma = RedSlider.Value;
-			RedGamma = RedSlider.Value;
+			GreenGamma = GreenSlider.Value;
+			BlueGamma = BlueSlider.Value;
 
 			this.DialogResult = true;
 			this.Close();

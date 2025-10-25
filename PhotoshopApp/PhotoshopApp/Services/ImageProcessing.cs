@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
@@ -6,6 +7,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Documents;
 using System.Windows.Media;
 using System.Windows.Media.Effects;
 using System.Windows.Media.Media3D;
@@ -14,7 +16,9 @@ namespace PhotoshopApp.Services
 {
 	public class ImageProcessing
 	{
-		//120ms
+		//on average
+		//50ms on big img
+		//5ms on 1080p
 		public static void InvertImage(Bitmap b)
 		{
 			BitmapData bmData = b.LockBits(new Rectangle(0, 0, b.Width, b.Height),
@@ -43,6 +47,7 @@ namespace PhotoshopApp.Services
 						p[0] = invertLUT[p[0]];
 						p[1] = invertLUT[p[1]];
 						p[2] = invertLUT[p[2]];
+
 						p += 3;
 					}
 				});
@@ -51,7 +56,9 @@ namespace PhotoshopApp.Services
 			b.UnlockBits(bmData);
 		}
 
-		//100ms
+		//on avg
+		//50ms on big img
+		//10ms on 1080p
 		public static void Grayscale(Bitmap b)
 		{
 			BitmapData bmData = b.LockBits(new Rectangle(0, 0, b.Width, b.Height),
@@ -93,8 +100,10 @@ namespace PhotoshopApp.Services
 			b.UnlockBits(bmData);
 		}
 
-		//100ms
-		public static void Gamma(Bitmap b, double red, double blue, double green)
+		//on avg
+		//50ms on big img
+		//3ms on 1080p 
+		public static void Gamma(Bitmap b, double red, double green, double blue)
 		{
 			BitmapData bmData = b.LockBits(new Rectangle(0, 0, b.Width, b.Height),
 				ImageLockMode.ReadWrite, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
@@ -118,7 +127,6 @@ namespace PhotoshopApp.Services
 			int height = b.Height;
 			unsafe
 			{
-
 				byte* pBase = (byte*)Scan0;
 				Parallel.For(0, height, y =>
 				{
@@ -133,76 +141,12 @@ namespace PhotoshopApp.Services
 						row += 3;
 					}
 				});
+
 			}
 
 			b.UnlockBits(bmData);
 		}
 
-		//public static void Conv3x3(Bitmap b, ConvMatrix m)
-		//{
-		//	if (m.Factor == 0)
-		//		return;
-
-		//	Bitmap bSrc = (Bitmap)b.Clone();
-		//	BitmapData bmData = b.LockBits(new Rectangle(0, 0, b.Width, b.Height),
-		//		ImageLockMode.ReadWrite,
-		//		System.Drawing.Imaging.PixelFormat.Format24bppRgb);
-
-		//	BitmapData bmSrc = bSrc.LockBits(new Rectangle(0, 0, b.Width, b.Height),
-		//		ImageLockMode.ReadWrite,
-		//		System.Drawing.Imaging.PixelFormat.Format24bppRgb);
-
-		//	int stride = bmData.Stride;
-		//	int stride2 = stride * 2;
-
-		//	IntPtr Scan0 = bmData.Scan0;
-		//	IntPtr SrcScan0 = bmSrc.Scan0;
-
-		//	unsafe
-		//	{
-		//		byte* pDestBase = (byte*)Scan0;
-		//		byte* pSrcBase = (byte*)SrcScan0;
-
-		//		int nOffset = stride - b.Width * 3;
-		//		int nWidth = b.Width - 2;
-		//		int nHeight = b.Height - 2;
-
-		//		Parallel.For(0, nHeight, y =>
-		//		{
-		//			byte* pDest = pDestBase + (y + 1) * stride + 3;
-		//			byte* pSrcRow0 = pSrcBase + y * stride;
-		//			byte* pSrcRow1 = pSrcBase + (y + 1) * stride;
-		//			byte* pSrcRow2 = pSrcBase + (y + 2) * stride;
-
-		//			for (int x = 0; x < nWidth; ++x)
-		//			{
-		//				int r = (pSrcRow0[2] * m.TopLeft + pSrcRow0[5] * m.TopMid + pSrcRow0[8] * m.TopRight +
-		//						 pSrcRow1[2] * m.MidLeft + pSrcRow1[5] * m.Pixel + pSrcRow1[8] * m.MidRight +
-		//						 pSrcRow2[2] * m.BottomLeft + pSrcRow2[5] * m.BottomMid + pSrcRow2[8] * m.BottomRight) / m.Factor + m.Offset;
-
-		//				int g = (pSrcRow0[1] * m.TopLeft + pSrcRow0[4] * m.TopMid + pSrcRow0[7] * m.TopRight +
-		//						pSrcRow1[1] * m.MidLeft + pSrcRow1[4] * m.Pixel + pSrcRow1[7] * m.MidRight +
-		//						pSrcRow2[1] * m.BottomLeft + pSrcRow2[4] * m.BottomMid + pSrcRow2[7] * m.BottomRight) / m.Factor + m.Offset;
-
-		//				int b = (pSrcRow0[0] * m.TopLeft + pSrcRow0[3] * m.TopMid + pSrcRow0[6] * m.TopRight +
-		//						pSrcRow1[0] * m.MidLeft + pSrcRow1[3] * m.Pixel + pSrcRow1[6] * m.MidRight +
-		//						pSrcRow2[0] * m.BottomLeft + pSrcRow2[3] * m.BottomMid + pSrcRow2[6] * m.BottomRight) / m.Factor + m.Offset;
-
-		//				pDest[2] = (byte)Math.Max(0, Math.Min(255, r));
-		//				pDest[1] = (byte)Math.Max(0, Math.Min(255, g));
-		//				pDest[0] = (byte)Math.Max(0, Math.Min(255, b));
-
-		//				pDest += 3;
-		//				pSrcRow0 += 3;
-		//				pSrcRow1 += 3;
-		//				pSrcRow2 += 3;
-		//			}
-		//		});
-		//	}
-
-		//	b.UnlockBits(bmData);
-		//	bSrc.UnlockBits(bmSrc);
-		//}
 
 		public static void Conv3x3(Bitmap b, ConvMatrix m)
 		{
@@ -227,7 +171,6 @@ namespace PhotoshopApp.Services
 				int nWidth = b.Width - 2;
 				int nHeight = b.Height - 2;
 
-				// Local kernel variables
 				int tl = m.TopLeft, tm = m.TopMid, tr = m.TopRight,
 					ml = m.MidLeft, c = m.Pixel, mr = m.MidRight,
 					bl = m.BottomLeft, bmK = m.BottomMid, br = m.BottomRight,
@@ -254,7 +197,6 @@ namespace PhotoshopApp.Services
 								 r1[0] * ml + r1[3] * c + r1[6] * mr +
 								 r2[0] * bl + r2[3] * bmK + r2[6] * br) / factor + offset;
 
-						// Inline clamp
 						pDest[2] = (byte)(r < 0 ? 0 : (r > 255 ? 255 : r));
 						pDest[1] = (byte)(g < 0 ? 0 : (g > 255 ? 255 : g));
 						pDest[0] = (byte)(b < 0 ? 0 : (b > 255 ? 255 : b));
@@ -266,7 +208,9 @@ namespace PhotoshopApp.Services
 			bSrc.UnlockBits(bmSrc);
 		}
 
-		//260ms
+		//on avg
+		//165ms big img
+		//15ms on 1080p
 		public static void GaussianBlur(Bitmap b)
 		{
 			ConvMatrix m = new ConvMatrix();
@@ -277,7 +221,10 @@ namespace PhotoshopApp.Services
 			Conv3x3(b, m);
 		}
 
-		//240ms
+
+		//on avg
+		//165ms big img
+		//10ms on 1080p
 		public static void BoxFilter(Bitmap b)
 		{
 			ConvMatrix m = new ConvMatrix();
@@ -287,7 +234,10 @@ namespace PhotoshopApp.Services
 			Conv3x3(b, m);
 		}
 
-		//250ms
+
+		//on avg
+		//175ms on big img
+		//15ms on 1080p
 		public static void SobelEdgeDetector(Bitmap b)
 		{
 			int width = b.Width;
@@ -358,10 +308,16 @@ namespace PhotoshopApp.Services
 							int bcB = botCenter[0]; int bcG = botCenter[1]; int bcR = botCenter[2];
 							int brB = botRight[0]; int brG = botRight[1]; int brR = botRight[2];
 
+							//-1 0 1
+							//-2 0 2
+							//-1 0 1
 							int gxB = (-tlB - 2 * mlB - blB) + (trB + 2 * mrB + brB);
 							int gxG = (-tlG - 2 * mlG - blG) + (trG + 2 * mrG + brG);
 							int gxR = (-tlR - 2 * mlR - blR) + (trR + 2 * mrR + brR);
 
+							//-1 -2 -1
+							//0 0 0
+							//1 2 1
 							int gyB = (-tlB - 2 * tcB - trB) + (blB + 2 * bcB + brB);
 							int gyG = (-tlG - 2 * tcG - trG) + (blG + 2 * bcG + brG);
 							int gyR = (-tlR - 2 * tcR - trR) + (blR + 2 * bcR + brR);
@@ -398,7 +354,9 @@ namespace PhotoshopApp.Services
 			b.UnlockBits(bmData);
 		}
 
-		//280ms
+		//on avg
+		//175ms on big img
+		//10ms on 1080p
 		public static void LaplaceEdgeDetector(Bitmap b)
 		{
 			ConvMatrix m = new ConvMatrix();
@@ -412,7 +370,9 @@ namespace PhotoshopApp.Services
 			Conv3x3(b, m);
 		}
 
-		//100ms
+		//on avg
+		//50ms on big img
+		//3ms on 1080p
 		public static void LogTransform(Bitmap b)
 		{
 			int width = b.Width;
@@ -454,7 +414,9 @@ namespace PhotoshopApp.Services
 			b.UnlockBits(bmData);
 		}
 
-		//75ms
+		//on avg
+		//35 ms on big img
+		//2ms on 1080p 
 		public static int[] Histogram(Bitmap b)
 		{
 			int[] hist = new int[256];
@@ -473,7 +435,7 @@ namespace PhotoshopApp.Services
 			}
 
 			BitmapData bmData = b.LockBits(new Rectangle(0, 0, b.Width, b.Height),
-		ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
+					ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
 
 			int stride = bmData.Stride;
 			IntPtr Scan0 = bmData.Scan0;
@@ -517,7 +479,9 @@ namespace PhotoshopApp.Services
 			return hist;
 		}
 
-		//150ms
+		//on avg
+		//70ms on big img
+		//15ms on 1080p
 		public static void HistogramEqualization(Bitmap b)
 		{
 			int[] hist = Histogram(b);
@@ -569,10 +533,10 @@ namespace PhotoshopApp.Services
 		}
 
 
-		//old 3700ms
-		//180ms on 1080p
-		//new 650ms
-		//new 50ms-ish for 1080p
+		//old 3700ms on big img
+		//on avg
+		//420ms on big img
+		//40ms on 1080p
 		public static void HarrisCornerDetector(Bitmap b)
 		{
 			const float k = 0.06f;
@@ -590,19 +554,30 @@ namespace PhotoshopApp.Services
 			int stride = bmData.Stride;
 			IntPtr scan0 = bmData.Scan0;
 
+			byte[] lutR = new byte[256];
+			byte[] lutG = new byte[256];
+			byte[] lutB = new byte[256];
+			for (int i = 0; i < 256; i++)
+			{
+				lutR[i] = (byte)(0.299 * i);
+				lutG[i] = (byte)(0.587 * i);
+				lutB[i] = (byte)(0.114 * i);
+			}
+
 			unsafe
 			{
 				byte* p = (byte*)scan0;
 
-				for (int y = 0; y < height; y++)
+				Parallel.For(0, height, y =>
 				{
 					byte* row = p + y * stride;
 					for (int x = 0; x < width; x++)
 					{
-						gray[y * width + x] = (byte)(0.299 * row[2] + 0.587 * row[1] + 0.114 * row[0]);
+						int idx = y * width + x;
+						gray[idx] = (byte)(lutR[row[2]] + lutG[row[1]] + lutB[row[0]]);
 						row += 3;
 					}
-				}
+				});
 
 				float[] Ix2 = new float[width * height];
 				float[] Iy2 = new float[width * height];
@@ -618,7 +593,6 @@ namespace PhotoshopApp.Services
 						Ix2[idx] = gx * gx;
 						Iy2[idx] = gy * gy;
 						IxIy[idx] = gx * gy;
-
 					}
 				});
 
@@ -630,6 +604,7 @@ namespace PhotoshopApp.Services
 					{
 						int idx = y * width + x;
 						float sumIx2 = 0, sumIy2 = 0, sumIxIy = 0;
+
 						for (int wy = -1; wy <= 1; wy++)
 						{
 							int rowOffset = (y + wy) * width;
@@ -640,7 +615,6 @@ namespace PhotoshopApp.Services
 								sumIy2 += Iy2[i];
 								sumIxIy += IxIy[i];
 							}
-
 						}
 
 						float det = sumIx2 * sumIy2 - sumIxIy * sumIxIy;
@@ -649,26 +623,39 @@ namespace PhotoshopApp.Services
 					}
 				});
 
-				for (int y = 1; y < height; y++)
+				Parallel.For(1, height - 1, y =>
 				{
-					byte* row = p + y * stride;
-					for (int x = 0; x < width; x++)
+					int yOffset = y * width;
+					unsafe
 					{
-						int idx = y * width + x;
-						if (R[idx] > threshold)
+						byte* row = p + y * stride;
+						for (int x = 1; x < width - 1; x++)
 						{
-							row[x * 3 + 0] = 0;
-							row[x * 3 + 1] = 0;
-							row[x * 3 + 2] = 255;
+							int idx = yOffset + x;
+							if (R[idx] > threshold)
+							{
+								int idxTop = idx - width;
+								int idxBottom = idx + width;
+
+								if (R[idx] > R[idx - 1] && R[idx] > R[idx + 1] &&
+									R[idx] > R[idxTop] && R[idx] > R[idxBottom] &&
+									R[idx] > R[idxTop - 1] && R[idx] > R[idxTop + 1] &&
+									R[idx] > R[idxBottom - 1] && R[idx] > R[idxBottom + 1])
+								{
+									row[x * 3 + 0] = 0;
+									row[x * 3 + 1] = 0;
+									row[x * 3 + 2] = 255;
+								}
+							}
 						}
 					}
-				}
+				});
 
 			}
 
 			b.UnlockBits(bmData);
 		}
 
-
 	}
 }
+

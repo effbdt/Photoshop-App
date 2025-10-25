@@ -74,6 +74,7 @@ namespace PhotoshopApp
 			{
 				MyImageControl.Source = bitmap;
 				loadedImage = ConvertToBitmap(bitmap);
+				loadedImage = Ensure24bpp(loadedImage);
 
 				originalImage = (Bitmap)loadedImage.Clone();
 			}
@@ -83,10 +84,8 @@ namespace PhotoshopApp
 			if (originalImage == null)
 				return;
 
-			// Clone the original to loadedImage so filters can be applied again
 			loadedImage = (Bitmap)originalImage.Clone();
 
-			// Refresh the Image control
 			MyImageControl.Source = ConvertToBitmapImage(loadedImage);
 		}
 
@@ -208,6 +207,20 @@ namespace PhotoshopApp
 			MessageBox.Show($"Filter applied in {sw.ElapsedMilliseconds} ms");
 
 		}
+
+		private static Bitmap Ensure24bpp(Bitmap bmp)
+		{
+			if (bmp.PixelFormat == System.Drawing.Imaging.PixelFormat.Format24bppRgb)
+				return bmp;
+
+			Bitmap clone = new Bitmap(bmp.Width, bmp.Height, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
+			using (Graphics g = Graphics.FromImage(clone))
+			{
+				g.DrawImage(bmp, new System.Drawing.Rectangle(0, 0, clone.Width, clone.Height));
+			}
+			return clone;
+		}
+
 
 		private void SaveImageButton_Click(object sender, RoutedEventArgs e)
 		{

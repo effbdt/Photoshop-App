@@ -53,7 +53,6 @@ namespace PhotoshopApp
 
 			if (openFileDialog.ShowDialog() == true)
 			{
-				// Load the selected image
 				BitmapImage bitmap = new BitmapImage();
 				bitmap.BeginInit();
 				bitmap.UriSource = new Uri(openFileDialog.FileName, UriKind.Absolute);

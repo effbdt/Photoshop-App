@@ -252,7 +252,7 @@ namespace PhotoshopApp.Services
 			int totalBytes = stride * height;
 
 			byte[] original = new byte[totalBytes];
-			System.Runtime.InteropServices.Marshal.Copy(bmData.Scan0, original, 0, totalBytes);
+			Marshal.Copy(bmData.Scan0, original, 0, totalBytes);
 
 			int max = 2040;
 			byte[] LUT = new byte[max + 1];
@@ -269,8 +269,6 @@ namespace PhotoshopApp.Services
 				try
 				{
 					IntPtr srcPtr = handle.AddrOfPinnedObject();
-
-
 
 					Parallel.For(1, height - 1, y =>
 					{
@@ -379,7 +377,7 @@ namespace PhotoshopApp.Services
 			int height = b.Height;
 
 			BitmapData bmData = b.LockBits(new Rectangle(0, 0, b.Width, b.Height),
-		ImageLockMode.ReadWrite, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
+				ImageLockMode.ReadWrite, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
 
 			int stride = bmData.Stride;
 			IntPtr Scan0 = bmData.Scan0;
